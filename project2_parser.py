@@ -267,6 +267,7 @@ class Parser:
     def program(self):
         tokens = ''
         while self.current_token != None:
+            print(self.current_token)
             self.statement()
         print(self.messages)
         return self.messages
@@ -302,6 +303,8 @@ class Parser:
             returnNode = self.arithmetic_expression()
             if (self.declaration and self.assignmentType != returnNode.type):
                 self.symbolTable[-1].append({first[0]: [self.assignmentType, None]})
+                print(returnNode.value)
+                print('im here printing2')
                 self.messages.append(f'Type Mismatch between {self.assignmentType} and {returnNode.type}')
             elif (self.declaration and self.assignmentType == returnNode.type):
                 self.symbolTable[-1].append({first[0]: [self.assignmentType, self.assignmentType]})
@@ -320,7 +323,12 @@ class Parser:
             plusMinus = self.current_token[0]
             self.advance()
             secondNum = self.term()
-            returnStr = ArithmeticExpressionNode(plusMinus, returnStr, secondNum)
+            if (returnStr.type == secondNum.type):
+                type = returnStr.type
+            else:
+                type = None
+                self.messages.append(f'Type Mismatch between {returnStr.type} and {secondNum.type}')
+            returnStr = ArithmeticExpressionNode(plusMinus, returnStr, secondNum, type)
             # returnStr = '(' + plusMinus + ', ' + returnStr + ', ' + self.term() + ')'
         return returnStr
 
@@ -333,6 +341,7 @@ class Parser:
             if (returnStr.type == returnStr2.type):
                 type = returnStr2.type
             else:
+                print('im here printing')
                 self.messages.append(f'Type Mismatch between {returnStr.type} and {returnStr2.type}')
                 type = None
             returnStr = TermNode(multDiv, returnStr, returnStr2, type)
@@ -349,7 +358,11 @@ class Parser:
         elif first[1] == 'float_digit':
             return FactorNode(first[0], 'float')
         elif first[1] == 'variable':
-            return FactorNode(first[0], self.getType(first[0]))
+            type = self.getType(first[0])
+            if (type == 'not declared'):
+                self.messages.append(f'Variable {first[0]} has not been declared in the current or any enclosing scopes')
+                return FactorNode(first[0], None)
+            return FactorNode(first[0], type)
         elif first[0] == '(':
             exp = self.arithmetic_expression()
             if self.current_token and self.current_token[0] == ')':
@@ -409,11 +422,12 @@ class Parser:
         if self.current_token[0] == '{':
             self.advance()
             self.symbolTable.append([])
-        returnNode = WhileLoopNode(second, self.statement())
-        if self.current_token[0] == '}':
-            self.advance()
-            self.symbolTable.pop()
-        return returnNode
+        returnNode = []
+        while self.current_token and self.current_token[0] != '}':
+            returnNode.append(self.statement())
+        self.advance()
+        self.symbolTable.pop()
+        return WhileLoopNode(second, returnNode)
         # return '(\'while\', ' + second + ', [' +  self.statement() + '])'
     
 
@@ -433,7 +447,7 @@ class Parser:
                     if variable in dict:
                         return dict[variable][1]
                 i -= 1
-        return None
+        return 'not declared'
     
     def getAssignType(self, variable):
         isDeclared = self.isDeclared(variable)
