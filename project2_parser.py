@@ -7,114 +7,158 @@
 # If you don't have a working lexer for project 1, we have provide a skelton of 
 # lexer. You need to complete the functions commented with tokenize.
 
-# newline lexer.
-class Token:
-    def __init__(self, token_type, value=None):
-        self.type = token_type
-        self.value = value
-
+# Lexer
 class Lexer:
-    def __init__(self, text):
-        self.text = text
-        self.pos = 0
-        self.current_char = self.text[self.pos]
+    def __init__(self, code):
+        self.code = code
+        self.position = 0
 
-    def error(self):
-        raise Exception('Invalid character')
-
-    def advance(self):
-        self.pos += 1
-        if self.pos < len(self.text):
-            self.current_char = self.text[self.pos]
-        else:
-            self.current_char = None
-        if self.current_char == '\n':  # Skip over newline characters
-            self.advance()
-
-    def peek(self):
-        peek_pos = self.pos + 1
-        if peek_pos < len(self.text):
-            return self.text[peek_pos]
-        else:
+    # move the lexer position and identify next possible tokens.
+    def get_token(self):
+        if self.position >= len(self.code):
             return None
+        else:
+            token = self.code[self.position]
+            while (self.position < len(self.code) and (self.code[self.position] == ' ' or self.code[self.position] == '\t' or self.code[self.position] == '\n')):
+                self.position += 1
 
-    def skip_whitespace(self):
-        while self.current_char is not None and self.current_char.isspace():
-            self.advance()
-
-    # implement
-    def number(self):
-
-    # implement
-    def identifier(self):
-
-
-    def get_next_token(self):
-        while self.current_char is not None:
-            if self.current_char.isspace():
-                self.skip_whitespace()
-                continue
-            elif self.current_char.isdigit():
-                res = self.number()
-                if res[1] == 1:
-                    return Token('FNUMBER', res[0])
+            if self.position >= len(self.code):
+                return None
+            token = self.code[self.position]
+            if (token.isalpha()):
+                self.position += 1
+                if (token == 'i' and (self.position + 2) < len(self.code)):
+                    helperString = self.code[(self.position): (self.position + 2)]
+                    if (helperString == 'f '):
+                        self.position += 2
+                        return ['if', 'if_statement']
+                    elif (helperString == 'nt' and self.code[(self.position) + 2] == ' '):
+                        self.position += 2
+                        return ['int', 'type']
+                    else:
+                        helperString = token
+                        token = self.code[self.position]
+                        while (token != ' ' and token != '\t' and token != '\n' and token != ')' and self.position + 1 < len(self.code)):
+                            helperString += token
+                            self.position += 1
+                            token = self.code[self.position]
+                        return [helperString, 'variable']
+                elif (token == 't' and (self.position + 4) < len(self.code)):
+                    helperString = self.code[(self.position): (self.position + 4)]
+                    if (helperString == 'hen\n' or helperString == 'hen '):
+                        self.position += 4
+                        return ['then', 'then_statement']
+                    else:
+                        helperString = token
+                        token = self.code[self.position]
+                        while (token != ' ' and token != '\t' and token != '\n' and token != ')' and self.position + 1 < len(self.code)):
+                            helperString += token
+                            self.position += 1
+                            token = self.code[self.position]
+                        return [helperString, 'variable']
+                elif (token == 'w' and (self.position + 5) < len(self.code)):
+                    helperString = self.code[(self.position): (self.position + 5)]
+                    if (helperString == 'hile '):
+                        self.position += 5
+                        return ['while', 'while_loop']
+                    else:
+                        helperString = token
+                        token = self.code[self.position]
+                        while (token != ' ' and token != '\t' and token != '\n' and token != ')' and self.position + 1 < len(self.code)):
+                            helperString += token
+                            self.position += 1
+                            token = self.code[self.position]
+                        return [helperString, 'variable']
+                elif (token == 'd' and (self.position + 1) < len(self.code)):
+                    helperString = self.code[(self.position): (self.position + 2)]
+                    if (helperString == 'o\n' or helperString == 'o '):
+                        self.position += 2
+                        return ['do', 'do_statement']
+                    else:
+                        helperString = token
+                        token = self.code[self.position]
+                        while (token != ' ' and token != '\t' and token != '\n' and token != ')' and self.position + 1 < len(self.code)):
+                            helperString += token
+                            self.position += 1
+                            token = self.code[self.position]
+                        return [helperString, 'variable']
+                elif (token == 'e' and (self.position + 3) < len(self.code)):
+                    helperString = self.code[(self.position): (self.position + 4)]
+                    if (helperString == 'lse '):
+                        self.position += 4
+                        return ['else', 'else_statement']
+                    else:
+                        helperString = token
+                        token = self.code[self.position]
+                        while (token != ' ' and token != '\t' and token != '\n' and token != ')' and self.position + 1 < len(self.code)):
+                            helperString += token
+                            self.position += 1
+                            token = self.code[self.position]
+                        return [helperString, 'variable']
+                elif (token == 'f' and (self.position + 4) < len(self.code)):
+                    helperString = self.code[(self.position): (self.position + 5)]
+                    if (helperString == 'loat '):
+                        self.position += 5
+                        return ['float', 'type']
+                    else:
+                        helperString = token
+                        token = self.code[self.position]
+                        while (token != ' ' and token != '\t' and token != '\n' and token != ')' and self.position + 1 < len(self.code)):
+                            helperString += token
+                            self.position += 1
+                            token = self.code[self.position]
+                        return [helperString, 'variable']
                 else:
-                    return Token('NUMBER', res[0])
-            elif self.current_char.isalpha() or self.current_char == '_':
-                return self.keyword_or_identifier()
-            elif self.current_char == '+' or self.current_char == '-' or self.current_char == '*' or self.current_char == '/':
-                return self.operator()
-            elif self.current_char == '(' or self.current_char == ')':
-                token = Token('PARENTHESIS', self.current_char)
-                self.advance()
-                return token
-            elif self.current_char == '{' or self.current_char == '}':
-                token = Token('SCOPE', self.current_char)
-                self.advance()
-                return token
-            elif self.current_char == '\n':  # Change delimiter to newline character
-                token = Token('DELIMITER', self.current_char)
-                self.advance()
-                return token
-            elif self.current_char == '!':
-                self.advance()
-                if self.current_char == '=':
-                    self.advance()
-                    return Token('OPERATOR', '!=')
+                    helperString = token
+                    token = self.code[self.position]
+                    while token.isalpha() or token.isdigit():
+                        helperString += token
+                        self.position += 1
+                        token = self.code[self.position]
+                    return [helperString, 'variable']
+            elif (token == '='):
+                self.position += 1
+                if (self.code[self.position] in ['>', '<', '=']):
+                    token += self.code[self.position]
+                    self.position += 1
+                    return [token, 'comparison']
+                return [token, 'expression']
+            elif (token in ['+', '-', '*', '/']):
+                self.position += 1
+                return [token, 'arithmetic_operator']
+            elif (token == '!'):
+                token = '!='
+                self.position += 2
+                return [token, 'comparison']
+            elif (token == '(' or token == ')'):
+                self.position += 1
+                return [token, 'parenthesis']
+            elif (token == '{' or token == '}'):
+                self.position += 1
+                return [token, 'startOrEnd']
+            elif (token == '>' or token == '<'):
+                self.position += 1
+                if (self.code[self.position] == '='):
+                    token += self.code[self.position]
+                    self.position += 1
+                    return [token, 'comparison']
+                return [token, 'comparison']
+            elif (token.isalnum()):
+                isDecimal = False
+                self.position += 1
+                helperString = token
+                token = self.code[self.position]
+                while token.isdigit() or token == '.':
+                    helperString += token
+                    if token == '.':
+                        isDecimal = True
+                    self.position += 1
+                    token = self.code[self.position]
+                if (isDecimal):
+                    return [helperString, 'float_digit']
                 else:
-                    self.error()
-
-            elif self.current_char == '=':
-                self.advance()
-                if self.current_char == '=':
-                    self.advance()
-                    return Token('OPERATOR', '==')
-                else:
-                    return Token('OPERATOR', '=')
-
-            elif self.current_char == '<':
-                self.advance()
-                if self.current_char == '=':
-                    self.advance()
-                    return Token('OPERATOR', '<=')
-                else:
-                    return Token('OPERATOR', '<')
-            elif self.current_char == '>':
-                self.advance()
-                if self.current_char == '=':
-                    self.advance()
-                    return Token('OPERATOR', '>=')
-                else:
-                    return Token('OPERATOR', '>')
-            else:
-                self.error()
-        return Token('EOF')
-
-    #implement
-    def keyword_or_identifier(self):
-
-    #implement
-    def operator(self):
+                    return [helperString, 'int_digit']
+            return None
 
 # Parse Tree Node definitions.
 # Don't need to modify these definitions for the completion of project 2.
@@ -198,131 +242,236 @@ class FactorNode(Node):
 class Parser:
     def __init__(self, lexer):
         self.lexer = lexer
-        self.current_token = self.lexer.get_next_token()
-        # implement symbol table and scopes
-       
+        self.current_token = None
+        self.advance()
         self.messages = []
+        self.symbolTable = [[]]
+        self.assignmentType = None
+        self.declaration = False
 
-    def print_parse_tree(self, node, indent=0):
-        message = ""
-        if isinstance(node, ProgramNode):
-            message += '  ' * indent + 'Program\n'
-            for statement in node.statements:
-                message += self.print_parse_tree(statement, indent + 1)
-        elif isinstance(node, DeclarationNode):
-            message += '  ' * indent + 'Declaration: ' + node.identifier + '\n'
-            message += self.print_parse_tree(node.expression, indent + 1)
-        elif isinstance(node, AssignmentNode):
-            message += '  ' * indent + 'Assignment: ' + node.identifier + '\n'
-            message += self.print_parse_tree(node.expression, indent + 1)
-        elif isinstance(node, IfStatementNode):
-            message += '  ' * indent + 'If Statement\n'
-            message += self.print_parse_tree(node.condition, indent + 1)
-            message += '  ' * indent + 'Then Block:\n'
-            for statement in node.if_block:
-                message += self.print_parse_tree(statement, indent + 2)
-            if node.else_block:
-                message += '  ' * indent + 'Else Block:\n'
-                for statement in node.else_block:
-                    message += self.print_parse_tree(statement, indent + 2)
-        elif isinstance(node, WhileLoopNode):
-            message += '  ' * indent + 'While Loop\n'
-            message += self.print_parse_tree(node.condition, indent + 1)
-            message += '  ' * indent + 'Loop Block:\n'
-            for statement in node.loop_block:
-                message += self.print_parse_tree(statement, indent + 2)
-        elif isinstance(node, ConditionNode):
-            message += '  ' * indent + 'Condition : with operator ' + node.operator + '\n'
-            message += '  ' * indent + 'LHS\n'
-            message += self.print_parse_tree(node.left, indent + 2)
-            message += '  ' * indent + 'RHS\n'
-            message += self.print_parse_tree(node.right, indent + 2)
-        elif isinstance(node, ArithmeticExpressionNode):
-            message += '  ' * indent + 'Arithmetic Expression: ' + node.operator + '\n'
-            message += self.print_parse_tree(node.left, indent + 1)
-            message += self.print_parse_tree(node.right, indent + 1)
-        elif isinstance(node, TermNode):
-            message += '  ' * indent + 'Term: ' + node.operator + '\n'
-            message += self.print_parse_tree(node.left, indent + 1)
-            message += self.print_parse_tree(node.right, indent + 1)
-        elif isinstance(node, FactorNode):
-            message += '  ' * indent + 'Factor: ' + str(node.value) + '\n'
-
-        return message
-
-
-    def error(self, message):
-        self.messages.append(message)
-
-    def eat(self, token_type):
-        if self.current_token.type == token_type:
-            self.current_token = self.lexer.get_next_token()
-        else:
-            self.error(f'Expected token of type {token_type}, but found {self.current_token.type}')
-
-    # enter the new scope in the program
-    def enter_scope(self, scope_prefix):
-        
-    # leave the current scope
-    def leave_scope(self):
-        
-    # return the current scope
-    def current_scope(self):
-        
-
-    def checkVarDeclared(self, identifier):
-        
-        if #implement :
-            self.error(f'Variable {identifier} has already been declared in the current scope')
-
-    def checkVarUse(self, identifier):
-        # check var declared, so we can use it.
-        self.error(f'Variable {identifier} has not been declared in the current or any enclosing scopes')
-
-
-    # return false when types mismatch, otherwise ret true
-    def checkTypeMatch(self, vType, eType, var, exp):
-
-    # return its type or None if not found
-    def getMyType(self, identifier):
-      
-
+    # function to parse the entire program
     def parse_program(self):
-        statements = []
-        while self.current_token.type != 'EOF':
-            statements.append(self.parse_statement())
-            if self.current_token.type == 'DELIMITER':
-                self.eat('DELIMITER')
-        return ProgramNode(statements)
-
-
-    def parse_statement(self):
-
-
-    def parse_declaration(self):
-
-
-    def parse_assignment(self):
-
-
-    def parse_if_statement(self):
- 
-
-    def parse_while_loop(self):
+        # while self.current_token != None:
+        #     print(self.current_token)
+        #     self.advance()
+        # return None
+        return self.program()
         
-        return WhileLoopNode(condition, loop_block)
+            
+        
+    # move to the next token.
+    def advance(self):
+        self.current_token = self.lexer.get_token()
+
+    # parse the one or multiple statements
+    def program(self):
+        tokens = ''
+        while self.current_token != None:
+            self.statement()
+        print(self.messages)
+        return self.messages
+        
     
-    # No need to check type mismatch here.
-    def parse_condition(self):
-        
-        return ConditionNode(left, operator, right)
+    # parse if, while, assignment statement.
+    def statement(self):
+        if self.current_token and self.current_token[1] == 'variable':
+            self.declaration = False
+            return self.assignment()
+        elif self.current_token and self.current_token[1] == 'type':
+            self.assignmentType = self.current_token[0]
+            self.advance()
+            self.declaration = True
+            return self.assignment()
+        elif self.current_token and self.current_token[1] == 'if_statement':
+            return self.if_statement()
+        elif self.current_token and self.current_token[1] == 'while_loop':
+            return self.while_loop()
+        return None
 
-    def parse_arithmetic_expression(self):
 
-        
+    # parse assignment statements
+    def assignment(self):
+        first = self.current_token
+        if self.declaration:
+            isAlreadyDeclared = self.isDeclaredInScope(first[0])
+            if isAlreadyDeclared:
+                self.messages.append(f'Variable {first[0]} has already been declared in the current scope')
+        self.advance()
+        if self.current_token and self.current_token[0] == '=':
+            self.advance()
+            returnNode = self.arithmetic_expression()
+            if (self.declaration and self.assignmentType != returnNode.type):
+                self.symbolTable[-1].append({first[0]: [self.assignmentType, None]})
+                self.messages.append(f'Type Mismatch between {self.assignmentType} and {returnNode.type}')
+            elif (self.declaration and self.assignmentType == returnNode.type):
+                self.symbolTable[-1].append({first[0]: [self.assignmentType, self.assignmentType]})
+            elif (self.declaration == False and self.getAssignType(first[0]) != returnNode.type):
+                self.messages.append(f'Type Mismatch between {self.getAssignType(first[0])} and {returnNode.type}')
+                self.updateSymbol(first[0], [first[1], None])
+            returnNode = AssignmentNode(first[0], returnNode)
+            return returnNode
+            # return '(\'=\', \'' + first + '\', ' + self.arithmetic_expression() + ')'
+        return None
 
-    def parse_term(self):
+    #parse arithmetic expressions
+    def arithmetic_expression(self):
+        returnStr = self.term()
+        while self.current_token and self.current_token[1] == 'arithmetic_operator' and self.current_token[0] in ['+', '-']:
+            plusMinus = self.current_token[0]
+            self.advance()
+            secondNum = self.term()
+            returnStr = ArithmeticExpressionNode(plusMinus, returnStr, secondNum)
+            # returnStr = '(' + plusMinus + ', ' + returnStr + ', ' + self.term() + ')'
+        return returnStr
+
+    def term(self):
+        returnStr = self.factor()
+        while self.current_token and self.current_token[1] == 'arithmetic_operator' and self.current_token[0] in ['*', '/']:
+            multDiv = self.current_token[0]
+            self.advance()
+            returnStr2 = self.factor()
+            if (returnStr.type == returnStr2.type):
+                type = returnStr2.type
+            else:
+                self.messages.append(f'Type Mismatch between {returnStr.type} and {returnStr2.type}')
+                type = None
+            returnStr = TermNode(multDiv, returnStr, returnStr2, type)
+            # returnStr = '(' + multDiv + ', ' + returnStr + ', ' + self.factor() + ')'
+        return returnStr
+
+    def factor(self):
+        first = self.current_token
+        if first is None:
+            return None
+        self.advance()
+        if first[1] == 'int_digit':
+            return FactorNode(first[0], 'int')
+        elif first[1] == 'float_digit':
+            return FactorNode(first[0], 'float')
+        elif first[1] == 'variable':
+            return FactorNode(first[0], self.getType(first[0]))
+        elif first[0] == '(':
+            exp = self.arithmetic_expression()
+            if self.current_token and self.current_token[0] == ')':
+                self.advance()
+            return exp
+        elif first[1] == 'comparison':
+            return first[0]
+        return None
+    
+
+    # parse if statement, you can handle then and else part here.
+    # you also have to check for condition.
+    def if_statement(self):
+        self.advance()
+        second = self.condition()
+        if (self.current_token[0] == 'then'):
+            self.advance()
+        if (self.current_token[0] == '{'):
+            self.symbolTable.append([])
+            self.advance()
+        third = []
+        while (self.current_token[0] != '}'):
+            third.append(self.statement())
+        if (self.current_token[0] == '}'):
+            self.advance()
+            self.symbolTable.pop()
+        if (self.current_token and self.current_token[0] == 'else'):
+            self.advance()
+            self.advance()
+            self.symbolTable.append([])
+            elseAddition = []
+            while self.current_token[0] != '}':
+                elseAddition.append(self.statement())
+            self.symbolTable.pop()
+            self.advance()
+            return IfStatementNode(second, third, elseAddition)
+        else:
+            return IfStatementNode(second, third, None)
+
+        # if self.current_token == None or self.current_token[0] != 'else':
+        #     return '(\'if\', ' + second + ', ' + third + ')'
+        # else:
+        #     self.advance()
+        #     if self.current_token == '{':
+        #         self.advance()
+        #     print(second, third)
+        #     return '(\'if\', ' + second + ', ' + third + ', ' + self.statement() + ')'
+
+    
+    # implement while statment, check for condition
+    # possibly make a call to statement?
+    def while_loop(self):
+        self.advance()
+        second = self.condition()
+        if self.current_token[0] == 'do':
+            self.advance()
+        if self.current_token[0] == '{':
+            self.advance()
+            self.symbolTable.append([])
+        returnNode = WhileLoopNode(second, self.statement())
+        if self.current_token[0] == '}':
+            self.advance()
+            self.symbolTable.pop()
+        return returnNode
+        # return '(\'while\', ' + second + ', [' +  self.statement() + '])'
+    
+
+    def condition(self):
+        first = self.factor()
+        second = self.factor()
+        third = self.factor()
+        return ConditionNode(first, second, third)
+        # return '(' + second + ', ' + first  + ', ' + third + ')'
+    
+    def getType(self, variable):
+        isDeclared = self.isDeclared(variable)
+        if isDeclared:
+            i = len(self.symbolTable) - 1
+            while (i >= 0):
+                for dict in self.symbolTable[i]:
+                    if variable in dict:
+                        return dict[variable][1]
+                i -= 1
+        return None
+    
+    def getAssignType(self, variable):
+        isDeclared = self.isDeclared(variable)
+        if isDeclared:
+            i = len(self.symbolTable) - 1
+            while (i >= 0):
+                for dict in self.symbolTable[i]:
+                    if variable in dict:
+                        return dict[variable][0]
+                i -= 1
+        return None
+
+    def isDeclared(self, variable):
+        i = len(self.symbolTable) - 1
+        while i >= 0:
+            for dict in self.symbolTable[i]:
+                if variable in dict:
+                    return True
+            i -= 1
+        return False
+    
+    def isDeclaredInScope(self, variable):
+        i = len(self.symbolTable) - 1
+        currentTable = self.symbolTable[i]
+        for dict in currentTable:
+            if variable in dict:
+                return True
+        return False
+    
+    def updateSymbol(self, variable, update):
+        i = len(self.symbolTable) - 1
+        while (i >= 0):
+            for dict in self.symbolTable[i]:
+                if variable in dict:
+                    dict[variable] = update
+                    return
+            i -= 1
+        return
 
 
-    def parse_factor(self):
 
