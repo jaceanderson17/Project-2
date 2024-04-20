@@ -251,10 +251,6 @@ class Parser:
 
     # function to parse the entire program
     def parse_program(self):
-        # while self.current_token != None:
-        #     print(self.current_token)
-        #     self.advance()
-        # return None
         return self.program()
         
             
@@ -267,9 +263,7 @@ class Parser:
     def program(self):
         tokens = ''
         while self.current_token != None:
-            print(self.current_token)
             self.statement()
-        print(self.messages)
         return self.messages
         
     
@@ -284,8 +278,10 @@ class Parser:
             self.declaration = True
             return self.assignment()
         elif self.current_token and self.current_token[1] == 'if_statement':
+            self.declaration = False
             return self.if_statement()
         elif self.current_token and self.current_token[1] == 'while_loop':
+            self.declaration = False
             return self.while_loop()
         return None
 
@@ -302,18 +298,14 @@ class Parser:
             self.advance()
             returnNode = self.arithmetic_expression()
             if (self.declaration and self.assignmentType != returnNode.type):
-                self.symbolTable[-1].append({first[0]: [self.assignmentType, None]})
-                print(returnNode.value)
-                print('im here printing2')
+                self.symbolTable[-1].append({first[0]: [self.assignmentType, self.assignmentType]})
                 self.messages.append(f'Type Mismatch between {self.assignmentType} and {returnNode.type}')
             elif (self.declaration and self.assignmentType == returnNode.type):
                 self.symbolTable[-1].append({first[0]: [self.assignmentType, self.assignmentType]})
             elif (self.declaration == False and self.getAssignType(first[0]) != returnNode.type):
                 self.messages.append(f'Type Mismatch between {self.getAssignType(first[0])} and {returnNode.type}')
-                self.updateSymbol(first[0], [first[1], None])
             returnNode = AssignmentNode(first[0], returnNode)
             return returnNode
-            # return '(\'=\', \'' + first + '\', ' + self.arithmetic_expression() + ')'
         return None
 
     #parse arithmetic expressions
@@ -329,7 +321,6 @@ class Parser:
                 type = None
                 self.messages.append(f'Type Mismatch between {returnStr.type} and {secondNum.type}')
             returnStr = ArithmeticExpressionNode(plusMinus, returnStr, secondNum, type)
-            # returnStr = '(' + plusMinus + ', ' + returnStr + ', ' + self.term() + ')'
         return returnStr
 
     def term(self):
@@ -341,11 +332,9 @@ class Parser:
             if (returnStr.type == returnStr2.type):
                 type = returnStr2.type
             else:
-                print('im here printing')
                 self.messages.append(f'Type Mismatch between {returnStr.type} and {returnStr2.type}')
                 type = None
             returnStr = TermNode(multDiv, returnStr, returnStr2, type)
-            # returnStr = '(' + multDiv + ', ' + returnStr + ', ' + self.factor() + ')'
         return returnStr
 
     def factor(self):
@@ -402,15 +391,6 @@ class Parser:
         else:
             return IfStatementNode(second, third, None)
 
-        # if self.current_token == None or self.current_token[0] != 'else':
-        #     return '(\'if\', ' + second + ', ' + third + ')'
-        # else:
-        #     self.advance()
-        #     if self.current_token == '{':
-        #         self.advance()
-        #     print(second, third)
-        #     return '(\'if\', ' + second + ', ' + third + ', ' + self.statement() + ')'
-
     
     # implement while statment, check for condition
     # possibly make a call to statement?
@@ -428,15 +408,13 @@ class Parser:
         self.advance()
         self.symbolTable.pop()
         return WhileLoopNode(second, returnNode)
-        # return '(\'while\', ' + second + ', [' +  self.statement() + '])'
     
 
     def condition(self):
-        first = self.factor()
+        first = self.arithmetic_expression()
         second = self.factor()
-        third = self.factor()
+        third = self.arithmetic_expression()
         return ConditionNode(first, second, third)
-        # return '(' + second + ', ' + first  + ', ' + third + ')'
     
     def getType(self, variable):
         isDeclared = self.isDeclared(variable)
@@ -476,16 +454,6 @@ class Parser:
             if variable in dict:
                 return True
         return False
-    
-    def updateSymbol(self, variable, update):
-        i = len(self.symbolTable) - 1
-        while (i >= 0):
-            for dict in self.symbolTable[i]:
-                if variable in dict:
-                    dict[variable] = update
-                    return
-            i -= 1
-        return
 
 
 
